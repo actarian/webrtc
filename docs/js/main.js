@@ -130,6 +130,24 @@ _defineProperty(SignalingService, "out$", new rxjs.ReplaySubject(1));var UserMed
 _defineProperty(UserMediaService, "stream", null);var CONNECTION_OPTIONS = {
   iceServers: [{
     urls: 'stun:stunserver.org'
+  }, {
+    urls: 'stun:stun.ekiga.net'
+  }, {
+    urls: 'stun:stun.ideasip.com'
+  }, {
+    urls: 'stun:stun.iptel.org'
+  }, {
+    urls: 'stun:stun.rixtelecom.se'
+  }, {
+    urls: 'stun:stun.schlund.de'
+  }, {
+    urls: 'stun:stun.softjoys.com'
+  }, {
+    urls: 'stun:stun.voiparound.com'
+  }, {
+    urls: 'stun:stun.voipbuster.com'
+  }, {
+    urls: 'stun:stun.voipstunt.com'
   }]
 };
 var OFFER_OPTIONS = {
