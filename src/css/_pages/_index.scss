@@ -43,6 +43,10 @@ img {
 		width: 120px;
 		height: 90px;
 		margin: 0;
+
+		.btn--muted {
+			display: none;
+		}
 	}
 }
 
@@ -61,6 +65,7 @@ img {
 }
 
 .webrtc-stream {
+	position: relative;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -70,6 +75,27 @@ img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.btn--muted {
+		position: absolute;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		right: 10px;
+		bottom: 10px;
+		width: 40px;
+		height: 40px;
+		border-radius: 20px;
+		background: none;
+		border: none;
+		color: white;
+		background: black;
+		cursor: pointer;
+
+		svg {
+			fill: currentColor;
+		}
 	}
 }
 

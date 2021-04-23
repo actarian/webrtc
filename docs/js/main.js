@@ -1077,6 +1077,10 @@ FlagPipe.meta = {
 
   var _proto = WebRTCStreamComponent.prototype;
 
+  _proto.onInit = function onInit() {
+    this.muted = true;
+  };
+
   _proto.onChanges = function onChanges() {
     var _getContext = rxcomp.getContext(this),
         node = _getContext.node;
@@ -1088,6 +1092,17 @@ FlagPipe.meta = {
     }
   };
 
+  _proto.onMuteToggle = function onMuteToggle() {
+    this.muted = !this.muted;
+
+    var _getContext2 = rxcomp.getContext(this),
+        node = _getContext2.node;
+
+    var video = node.querySelector('video');
+    video.muted = this.muted;
+    this.pushChanges();
+  };
+
   return WebRTCStreamComponent;
 }(rxcomp.Component);
 WebRTCStreamComponent.meta = {
@@ -1095,7 +1110,7 @@ WebRTCStreamComponent.meta = {
   inputs: ['stream'],
   template:
   /* html */
-  "\n\t\t<div class=\"webrtc-stream\">\n\t\t\t<video playsinline autoplay muted></video>\n\t\t</div>\n\t"
+  "\n\t\t<div class=\"webrtc-stream\">\n\t\t\t<video playsinline autoplay muted></video>\n\t\t\t<button type=\"button\" class=\"btn--muted\" (click)=\"onMuteToggle()\">\n\t\t\t\t<svg class=\"mic-muted\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" *if=\"muted\"><use xlink:href=\"#mic-muted\"></use></svg>\n\t\t\t\t<svg class=\"mic\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" *if=\"!muted\"><use xlink:href=\"#mic\"></use></svg>\n\t\t\t</button>\n\t\t</div>\n\t"
 };var AppModule = /*#__PURE__*/function (_Module) {
   _inheritsLoose(AppModule, _Module);
 

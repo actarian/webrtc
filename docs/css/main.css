@@ -3176,6 +3176,8 @@ img {
     width: 120px;
     height: 90px;
     margin: 0; }
+    .group--head .webrtc-stream .btn--muted {
+      display: none; }
 
 .group--streams {
   flex: 1 1 calc(100% - 90px);
@@ -3189,6 +3191,7 @@ img {
     margin: 0 10px 10px 0; }
 
 .webrtc-stream {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center; }
@@ -3197,6 +3200,23 @@ img {
     width: 100%;
     height: 100%;
     object-fit: cover; }
+  .webrtc-stream .btn--muted {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 10px;
+    bottom: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: none;
+    border: none;
+    color: white;
+    background: black;
+    cursor: pointer; }
+    .webrtc-stream .btn--muted svg {
+      fill: currentColor; }
 
 .listing--peers {
   padding: 10px 0; }
