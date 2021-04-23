@@ -247,8 +247,9 @@ var WebRTCClient = /*#__PURE__*/function () {
   };
 
   _proto.onIceConnectionStateChange = function onIceConnectionStateChange(event) {
-    // console.log('WebRTCClient.onIceConnectionStateChange', event);
-    switch (this.iceConnectionState) {
+    console.log('WebRTCClient.onIceConnectionStateChange', this.connection.iceConnectionState);
+
+    switch (this.connection.iceConnectionState) {
       case 'closed':
       case 'failed':
       case 'disconnected':
