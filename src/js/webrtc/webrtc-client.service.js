@@ -1,8 +1,12 @@
-import { BehaviorSubject, combineLatest, of, ReplaySubject } from "rxjs";
-import { filter, switchAll } from "rxjs/operators";
-import { SignalingService } from "./signaling.service";
+import { BehaviorSubject, combineLatest, of, ReplaySubject } from 'rxjs';
+import { filter, switchAll } from 'rxjs/operators';
+import { SignalingService } from './signaling.service';
 
-const SERVERS = null;
+const CONNECTION_OPTIONS = {
+	iceServers: [{
+		urls: 'stun:stunserver.org'
+	}]
+};
 
 const OFFER_OPTIONS = {
 	offerToReceiveAudio: true,
@@ -28,7 +32,7 @@ export class WebRTCClient {
 		this.onNegotiationceNeeded = this.onNegotiationceNeeded.bind(this);
 		this.onTrack = this.onTrack.bind(this);
 		// Create an RTCPeerConnection via the polyfill.
-		const connection = this.connection = new RTCPeerConnection(SERVERS);
+		const connection = this.connection = new RTCPeerConnection(CONNECTION_OPTIONS);
 		if (stream) {
 			stream.getTracks().forEach(track => connection.addTrack(track, stream));
 		}
@@ -38,6 +42,7 @@ export class WebRTCClient {
 		connection.addEventListener('signalingstatechange', this.onSignalingStateChange);
 		connection.addEventListener('negotiationneeded', this.onNegotiationceNeeded);
 		connection.addEventListener('track', this.onTrack);
+		// !!! cancel on dispose
 		SignalingService.in$.pipe(
 			// tap(event => console.log(event)),
 			filter(event => event.uid !== this.uid),
@@ -184,7 +189,7 @@ export class WebRTCClient {
 		}
 		if (this.connection.signalingState != 'stable') {
 			Promise.all([
-				this.connection.setLocalDescription({ type: "rollback" }),
+				this.connection.setLocalDescription({ type: 'rollback' }),
 				this.connection.setRemoteDescription(description).catch(error => {
 					console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
 				}),

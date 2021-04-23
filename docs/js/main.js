@@ -127,7 +127,11 @@ _defineProperty(SignalingService, "out$", new rxjs.ReplaySubject(1));var UserMed
   return UserMediaService;
 }();
 
-_defineProperty(UserMediaService, "stream", null);var SERVERS = null;
+_defineProperty(UserMediaService, "stream", null);var CONNECTION_OPTIONS = {
+  iceServers: [{
+    urls: 'stun:stunserver.org'
+  }]
+};
 var OFFER_OPTIONS = {
   offerToReceiveAudio: true,
   offerToReceiveVideo: true
@@ -156,7 +160,7 @@ var WebRTCClient = /*#__PURE__*/function () {
     this.onNegotiationceNeeded = this.onNegotiationceNeeded.bind(this);
     this.onTrack = this.onTrack.bind(this); // Create an RTCPeerConnection via the polyfill.
 
-    var connection = this.connection = new RTCPeerConnection(SERVERS);
+    var connection = this.connection = new RTCPeerConnection(CONNECTION_OPTIONS);
 
     if (stream) {
       stream.getTracks().forEach(function (track) {
@@ -169,7 +173,8 @@ var WebRTCClient = /*#__PURE__*/function () {
     connection.addEventListener('icegatheringstatechange', this.onIceGatheringStateChange);
     connection.addEventListener('signalingstatechange', this.onSignalingStateChange);
     connection.addEventListener('negotiationneeded', this.onNegotiationceNeeded);
-    connection.addEventListener('track', this.onTrack);
+    connection.addEventListener('track', this.onTrack); // !!! cancel on dispose
+
     SignalingService.in$.pipe( // tap(event => console.log(event)),
     operators.filter(function (event) {
       return event.uid !== _this.uid;
@@ -355,7 +360,7 @@ var WebRTCClient = /*#__PURE__*/function () {
 
     if (this.connection.signalingState != 'stable') {
       Promise.all([this.connection.setLocalDescription({
-        type: "rollback"
+        type: 'rollback'
       }), this.connection.setRemoteDescription(description).catch(function (error) {
         console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
       })]);
