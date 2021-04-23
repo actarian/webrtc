@@ -223,35 +223,39 @@ var WebRTCClient = /*#__PURE__*/function () {
   _proto.dispose = function dispose() {
     this.remote$.next(null);
     var connection = this.connection;
-    connection.removeEventListener('icecandidate', this.onIceCandidate);
-    connection.removeEventListener('iceconnectionstatechange', this.onIceConnectionStateChange);
-    connection.removeEventListener('icegatheringstatechange', this.onIceGatheringStateChange);
-    connection.removeEventListener('signalingstatechange', this.onSignalingStateChange);
-    connection.removeEventListener('negotiationneeded', this.onNegotiationceNeeded);
-    connection.removeEventListener('track', this.onTrack);
-    /*
-    connection.getTracks().forEach(track => {
-    	track.stop();
-    });
-    */
 
-    /*
-    connection.getTransceivers().forEach(transceiver => {
-    	transceiver.stop();
-    });
-    */
+    if (connection) {
+      connection.removeEventListener('icecandidate', this.onIceCandidate);
+      connection.removeEventListener('iceconnectionstatechange', this.onIceConnectionStateChange);
+      connection.removeEventListener('icegatheringstatechange', this.onIceGatheringStateChange);
+      connection.removeEventListener('signalingstatechange', this.onSignalingStateChange);
+      connection.removeEventListener('negotiationneeded', this.onNegotiationceNeeded);
+      connection.removeEventListener('track', this.onTrack);
+      /*
+      connection.getTracks().forEach(track => {
+      	track.stop();
+      });
+      */
 
-    /*
-    if (localVideo.srcObject) {
-    	localVideo.pause();
-    	localVideo.srcObject.getTracks().forEach(track => {
-    		track.stop();
-    	});
+      /*
+      connection.getTransceivers().forEach(transceiver => {
+      	transceiver.stop();
+      });
+      */
+
+      /*
+      if (localVideo.srcObject) {
+      	localVideo.pause();
+      	localVideo.srcObject.getTracks().forEach(track => {
+      		track.stop();
+      	});
+      }
+      */
+      // Close the peer connection
+
+      connection.close();
     }
-    */
-    // Close the peer connection
 
-    connection.close();
     this.connection = null; // webcamStream = null;
   };
 
