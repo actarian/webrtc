@@ -7,7 +7,7 @@ export default class WebRTCStreamComponent extends Component {
 		const video = node.querySelector('video');
 		if (video.srcObject !== this.stream) {
 			video.srcObject = this.stream;
-			console.log('WebRTCStreamComponent', video, this.stream);
+			// console.log('WebRTCStreamComponent', video, this.stream);
 		}
 	}
 

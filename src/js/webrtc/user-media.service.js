@@ -13,9 +13,9 @@ export class UserMediaService {
 				}
 			};
 			navigator.mediaDevices.getUserMedia(options).then((stream) => {
-				console.log('UserMediaService.getUserMedia', stream);
+				// console.log('UserMediaService.getUserMedia', stream);
 				UserMediaService.stream = stream;
-				//
+				/*/
 				const audioTracks = stream.getAudioTracks();
 				if (audioTracks.length > 0) {
 					console.log('UserMediaService.audioTracks', audioTracks[0].label);
@@ -24,7 +24,7 @@ export class UserMediaService {
 				if (videoTracks.length > 0) {
 					console.log('UserMediaService.videoTracks', videoTracks[0].label);
 				}
-				//
+				/*/
 				resolve(stream);
 
 			}).catch(error => {

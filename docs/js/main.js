@@ -103,21 +103,18 @@ _defineProperty(SignalingService, "out$", new rxjs.ReplaySubject(1));var UserMed
         }
       };
       navigator.mediaDevices.getUserMedia(options).then(function (stream) {
-        console.log('UserMediaService.getUserMedia', stream);
-        UserMediaService.stream = stream; //
-
-        var audioTracks = stream.getAudioTracks();
-
+        // console.log('UserMediaService.getUserMedia', stream);
+        UserMediaService.stream = stream;
+        /*/
+        const audioTracks = stream.getAudioTracks();
         if (audioTracks.length > 0) {
-          console.log('UserMediaService.audioTracks', audioTracks[0].label);
+        	console.log('UserMediaService.audioTracks', audioTracks[0].label);
         }
-
-        var videoTracks = stream.getVideoTracks();
-
+        const videoTracks = stream.getVideoTracks();
         if (videoTracks.length > 0) {
-          console.log('UserMediaService.videoTracks', videoTracks[0].label);
-        } //
-
+        	console.log('UserMediaService.videoTracks', videoTracks[0].label);
+        }
+        /*/
 
         resolve(stream);
       }).catch(function (error) {
@@ -173,13 +170,11 @@ var WebRTCClient = /*#__PURE__*/function () {
     connection.addEventListener('signalingstatechange', this.onSignalingStateChange);
     connection.addEventListener('negotiationneeded', this.onNegotiationceNeeded);
     connection.addEventListener('track', this.onTrack);
-    SignalingService.in$.pipe(operators.tap(function (event) {
-      return console.log(event);
-    }), operators.filter(function (event) {
+    SignalingService.in$.pipe( // tap(event => console.log(event)),
+    operators.filter(function (event) {
       return event.uid !== _this.uid;
     })).subscribe(function (message) {
-      console.log('WebRTCClient.message', message);
-
+      // console.log('WebRTCClient.message', message);
       switch (message.type) {
         case 'candidate':
           _this.onMessageCandidate(message);
@@ -238,7 +233,7 @@ var WebRTCClient = /*#__PURE__*/function () {
   };
 
   _proto.onIceCandidate = function onIceCandidate(event) {
-    console.log('WebRTCClient.onIceCandidate', event);
+    // console.log('WebRTCClient.onIceCandidate', event);
     var candidate = event.candidate;
 
     if (candidate) {
@@ -252,8 +247,7 @@ var WebRTCClient = /*#__PURE__*/function () {
   };
 
   _proto.onIceConnectionStateChange = function onIceConnectionStateChange(event) {
-    console.log('WebRTCClient.onIceConnectionStateChange', event);
-
+    // console.log('WebRTCClient.onIceConnectionStateChange', event);
     switch (this.iceConnectionState) {
       case 'closed':
       case 'failed':
@@ -268,8 +262,7 @@ var WebRTCClient = /*#__PURE__*/function () {
   };
 
   _proto.onSignalingStateChange = function onSignalingStateChange(event) {
-    console.log('WebRTCClient.onSignalingStateChange', this.connection.signalingState);
-
+    // console.log('WebRTCClient.onSignalingStateChange', this.connection.signalingState);
     switch (this.connection.signalingState) {
       case 'closed':
         this.dispose();
@@ -280,7 +273,7 @@ var WebRTCClient = /*#__PURE__*/function () {
   _proto.onNegotiationceNeeded = function onNegotiationceNeeded(event) {
     var _this2 = this;
 
-    console.log('WebRTCClient.onNegotiationceNeeded', event);
+    // console.log('WebRTCClient.onNegotiationceNeeded', event);
     this.connection.createOffer(OFFER_OPTIONS).then(function (offer) {
       /*
       if (this.connection.signalingState != 'stable') {
@@ -302,8 +295,8 @@ var WebRTCClient = /*#__PURE__*/function () {
   };
 
   _proto.onTrack = function onTrack(event) {
-    console.log('WebRTCClient.onTrack', event.streams);
     var remote = event.streams[0];
+    console.log('WebRTCClient.onTrack', remote);
     this.remote$.next(remote);
   };
 
@@ -327,11 +320,10 @@ var WebRTCClient = /*#__PURE__*/function () {
   _proto.onMessageCandidate = function onMessageCandidate(message) {
     if (message.uid !== this.remoteId) {
       return;
-    }
+    } // console.log('WebRTCClient.onMessageCandidate', 'uid', message.uid);
 
-    console.log('WebRTCClient.onMessageCandidate', 'uid', message.uid);
-    this.connection.addIceCandidate(message.candidate).then(function () {
-      console.log('WebRTCService.onAddIceCandidateResolve');
+
+    this.connection.addIceCandidate(message.candidate).then(function () {// console.log('WebRTCService.onAddIceCandidateResolve', message.candidate.candidate);
     }, this.onAddIceCandidateReject);
   };
 
@@ -340,9 +332,9 @@ var WebRTCClient = /*#__PURE__*/function () {
 
     if (message.uid !== this.remoteId) {
       return;
-    }
+    } // console.log('WebRTCClient.onMessageOffer', 'uid', message.uid);
 
-    console.log('WebRTCClient.onMessageOffer', 'uid', message.uid);
+
     var description = new RTCSessionDescription(message.description);
 
     var onAnswer = function onAnswer() {
@@ -363,11 +355,15 @@ var WebRTCClient = /*#__PURE__*/function () {
     if (this.connection.signalingState != 'stable') {
       Promise.all([this.connection.setLocalDescription({
         type: "rollback"
-      }), this.connection.setRemoteDescription(description)]);
+      }), this.connection.setRemoteDescription(description).catch(function (error) {
+        console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
+      })]);
       return;
     } else {
       this.connection.setRemoteDescription(description).then(function (_) {
         onAnswer();
+      }).catch(function (error) {
+        console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
       });
     }
   };
@@ -375,25 +371,27 @@ var WebRTCClient = /*#__PURE__*/function () {
   _proto.onMessageAnswer = function onMessageAnswer(message) {
     if (message.uid !== this.remoteId) {
       return;
-    }
-
-    console.log('WebRTCClient.onMessageAnswer', 'uid', message.uid); // Since the 'remote' side has no media stream we need
+    } // console.log('WebRTCClient.onMessageAnswer', 'uid', message.uid);
+    // Since the 'remote' side has no media stream we need
     // to pass in the right constraints in order for it to
     // accept the incoming offer of audio and video.
 
-    this.connection.setRemoteDescription(new RTCSessionDescription(message.description));
+
+    this.connection.setRemoteDescription(new RTCSessionDescription(message.description)).catch(function (error) {
+      console.log('WebRTCClient.onMessageAnswer.setRemoteDescription.error', error);
+    });
   };
 
   _proto.onAddIceCandidateReject = function onAddIceCandidateReject(error) {
-    console.log('WebRTCClient.onAddIceCandidateReject', error.toString());
+    console.log('WebRTCClient.onAddIceCandidateReject.error', error);
   };
 
   _proto.onCreateOfferReject = function onCreateOfferReject(error) {
-    console.log('WebRTCClient.onCreateOfferReject', error.toString());
+    console.log('WebRTCClient.onCreateOfferReject.error', error);
   };
 
   _proto.onCreateAnswerReject = function onCreateAnswerReject(error) {
-    console.log('WebRTCClient.onCreateAnswerReject', error.toString());
+    console.log('WebRTCClient.onCreateAnswerReject.error', error);
   };
 
   WebRTCClient.call = function call(stream, uid, remoteId) {
@@ -405,7 +403,7 @@ var WebRTCClient = /*#__PURE__*/function () {
       remoteId = null;
     }
 
-    console.log('WebRTCClient.call', remoteId);
+    // console.log('WebRTCClient.call', remoteId);
     var client = new WebRTCClient(stream, uid, remoteId);
     return client;
   };
@@ -419,7 +417,7 @@ var WebRTCClient = /*#__PURE__*/function () {
       remoteId = null;
     }
 
-    console.log('WebRTCClient.answer', remoteId);
+    // console.log('WebRTCClient.answer', remoteId);
     var client = new WebRTCClient(stream, uid, remoteId);
     return client;
   };
@@ -640,16 +638,15 @@ _defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var App
     var _getContext = rxcomp.getContext(this),
         node = _getContext.node;
 
-    node.classList.remove('hidden');
-    console.log('AppComponent');
+    node.classList.remove('hidden'); // console.log('AppComponent');
+
     this.local = null;
     this.uid = null;
     this.peers = [];
     this.remotes = [];
     this.streams = [];
     SignalingService.in$.pipe(operators.tap(function (message) {
-      console.log('AppComponent.SignalingService.in$', message);
-
+      // console.log('AppComponent.SignalingService.in$', message);
       switch (message.type) {
         case 'socketConnected':
           _this.onSocketConnected();
@@ -705,7 +702,7 @@ _defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var App
       return WebSocketService.send(message);
     })).subscribe();
     WebRTCClientService.remotes$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (remotes) {
-      console.log('AppComponent.remotes', remotes);
+      // console.log('AppComponent.remotes', remotes);
       _this.remotes = remotes;
 
       _this.pushChanges();
@@ -791,7 +788,7 @@ _defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var App
   };
 
   _proto.onOffer = function onOffer(message) {
-    console.log('AppComponent.onOffer', message);
+    // console.log('AppComponent.onOffer', message);
     var client = WebRTCClientService.addPeer(this.local, this.uid, message.uid);
 
     if (client != null) {
@@ -1059,8 +1056,7 @@ FlagPipe.meta = {
     var video = node.querySelector('video');
 
     if (video.srcObject !== this.stream) {
-      video.srcObject = this.stream;
-      console.log('WebRTCStreamComponent', video, this.stream);
+      video.srcObject = this.stream; // console.log('WebRTCStreamComponent', video, this.stream);
     }
   };
 

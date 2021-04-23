@@ -1,5 +1,5 @@
 import { BehaviorSubject, combineLatest, of, ReplaySubject } from "rxjs";
-import { filter, switchAll, tap } from "rxjs/operators";
+import { filter, switchAll } from "rxjs/operators";
 import { SignalingService } from "./signaling.service";
 
 const SERVERS = null;
@@ -39,10 +39,10 @@ export class WebRTCClient {
 		connection.addEventListener('negotiationneeded', this.onNegotiationceNeeded);
 		connection.addEventListener('track', this.onTrack);
 		SignalingService.in$.pipe(
-			tap(event => console.log(event)),
+			// tap(event => console.log(event)),
 			filter(event => event.uid !== this.uid),
 		).subscribe(message => {
-			console.log('WebRTCClient.message', message);
+			// console.log('WebRTCClient.message', message);
 			switch (message.type) {
 				case 'candidate':
 					this.onMessageCandidate(message);
@@ -99,7 +99,7 @@ export class WebRTCClient {
 	}
 
 	onIceCandidate(event) {
-		console.log('WebRTCClient.onIceCandidate', event);
+		// console.log('WebRTCClient.onIceCandidate', event);
 		const candidate = event.candidate;
 		if (candidate) {
 			SignalingService.send({ type: 'candidate', candidate, uid: this.uid, remoteId: this.remoteId });
@@ -107,7 +107,7 @@ export class WebRTCClient {
 	}
 
 	onIceConnectionStateChange(event) {
-		console.log('WebRTCClient.onIceConnectionStateChange', event);
+		// console.log('WebRTCClient.onIceConnectionStateChange', event);
 		switch (this.iceConnectionState) {
 			case 'closed':
 			case 'failed':
@@ -122,7 +122,7 @@ export class WebRTCClient {
 	}
 
 	onSignalingStateChange(event) {
-		console.log('WebRTCClient.onSignalingStateChange', this.connection.signalingState);
+		// console.log('WebRTCClient.onSignalingStateChange', this.connection.signalingState);
 		switch (this.connection.signalingState) {
 			case 'closed':
 				this.dispose();
@@ -131,7 +131,7 @@ export class WebRTCClient {
 	}
 
 	onNegotiationceNeeded(event) {
-		console.log('WebRTCClient.onNegotiationceNeeded', event);
+		// console.log('WebRTCClient.onNegotiationceNeeded', event);
 		this.connection.createOffer(OFFER_OPTIONS).then((offer) => {
 			/*
 			if (this.connection.signalingState != 'stable') {
@@ -146,8 +146,8 @@ export class WebRTCClient {
 	}
 
 	onTrack(event) {
-		console.log('WebRTCClient.onTrack', event.streams);
 		const remote = event.streams[0];
+		console.log('WebRTCClient.onTrack', remote);
 		this.remote$.next(remote);
 	}
 
@@ -163,9 +163,9 @@ export class WebRTCClient {
 		if (message.uid !== this.remoteId) {
 			return;
 		}
-		console.log('WebRTCClient.onMessageCandidate', 'uid', message.uid);
+		// console.log('WebRTCClient.onMessageCandidate', 'uid', message.uid);
 		this.connection.addIceCandidate(message.candidate).then(() => {
-			console.log('WebRTCService.onAddIceCandidateResolve');
+			// console.log('WebRTCService.onAddIceCandidateResolve', message.candidate.candidate);
 		}, this.onAddIceCandidateReject);
 	}
 
@@ -173,7 +173,7 @@ export class WebRTCClient {
 		if (message.uid !== this.remoteId) {
 			return;
 		}
-		console.log('WebRTCClient.onMessageOffer', 'uid', message.uid);
+		// console.log('WebRTCClient.onMessageOffer', 'uid', message.uid);
 		const description = new RTCSessionDescription(message.description);
 		const onAnswer = () => {
 			this.connection.createAnswer().then((answer) => {
@@ -185,12 +185,16 @@ export class WebRTCClient {
 		if (this.connection.signalingState != 'stable') {
 			Promise.all([
 				this.connection.setLocalDescription({ type: "rollback" }),
-				this.connection.setRemoteDescription(description),
+				this.connection.setRemoteDescription(description).catch(error => {
+					console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
+				}),
 			]);
 			return;
 		} else {
 			this.connection.setRemoteDescription(description).then(_ => {
 				onAnswer();
+			}).catch(error => {
+				console.log('WebRTCClient.onMessageOffer.setRemoteDescription.error', error);
 			});
 		}
 	}
@@ -199,33 +203,35 @@ export class WebRTCClient {
 		if (message.uid !== this.remoteId) {
 			return;
 		}
-		console.log('WebRTCClient.onMessageAnswer', 'uid', message.uid);
+		// console.log('WebRTCClient.onMessageAnswer', 'uid', message.uid);
 		// Since the 'remote' side has no media stream we need
 		// to pass in the right constraints in order for it to
 		// accept the incoming offer of audio and video.
-		this.connection.setRemoteDescription(new RTCSessionDescription(message.description));
+		this.connection.setRemoteDescription(new RTCSessionDescription(message.description)).catch(error => {
+			console.log('WebRTCClient.onMessageAnswer.setRemoteDescription.error', error);
+		});
 	}
 
 	onAddIceCandidateReject(error) {
-		console.log('WebRTCClient.onAddIceCandidateReject', error.toString());
+		console.log('WebRTCClient.onAddIceCandidateReject.error', error);
 	}
 
 	onCreateOfferReject(error) {
-		console.log('WebRTCClient.onCreateOfferReject', error.toString());
+		console.log('WebRTCClient.onCreateOfferReject.error', error);
 	}
 
 	onCreateAnswerReject(error) {
-		console.log('WebRTCClient.onCreateAnswerReject', error.toString());
+		console.log('WebRTCClient.onCreateAnswerReject.error', error);
 	}
 
 	static call(stream, uid = null, remoteId = null) {
-		console.log('WebRTCClient.call', remoteId);
+		// console.log('WebRTCClient.call', remoteId);
 		const client = new WebRTCClient(stream, uid, remoteId);
 		return client;
 	}
 
 	static answer(stream, uid = null, remoteId = null) {
-		console.log('WebRTCClient.answer', remoteId);
+		// console.log('WebRTCClient.answer', remoteId);
 		const client = new WebRTCClient(stream, uid, remoteId);
 		return client;
 	}

@@ -14,7 +14,7 @@ export default class AppComponent extends Component {
 	onInit() {
 		const { node } = getContext(this);
 		node.classList.remove('hidden');
-		console.log('AppComponent');
+		// console.log('AppComponent');
 
 		this.local = null;
 		this.uid = null;
@@ -24,7 +24,7 @@ export default class AppComponent extends Component {
 
 		SignalingService.in$.pipe(
 			tap(message => {
-				console.log('AppComponent.SignalingService.in$', message);
+				// console.log('AppComponent.SignalingService.in$', message);
 				switch (message.type) {
 					case 'socketConnected':
 						this.onSocketConnected();
@@ -73,7 +73,7 @@ export default class AppComponent extends Component {
 		WebRTCClientService.remotes$.pipe(
 			takeUntil(this.unsubscribe$)
 		).subscribe(remotes => {
-			console.log('AppComponent.remotes', remotes);
+			// console.log('AppComponent.remotes', remotes);
 			this.remotes = remotes;
 			this.pushChanges();
 		});
@@ -138,7 +138,7 @@ export default class AppComponent extends Component {
 	}
 
 	onOffer(message) {
-		console.log('AppComponent.onOffer', message);
+		// console.log('AppComponent.onOffer', message);
 		const client = WebRTCClientService.addPeer(this.local, this.uid, message.uid);
 		if (client != null) {
 			client.onMessageOffer(message);
