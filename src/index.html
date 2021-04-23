@@ -1,0 +1,22 @@
+<!-- @@master = ./templates/layout.html { "baseHref": "/webrtc/" } -->
+<!-- @@block = main-->
+<div class="page">
+	<div class="group--main">
+		<div class="group--head">
+			<div webrtc-stream [stream]="local" *if="local"></div>
+		</div>
+		<div class="group--streams">
+			<div webrtc-stream [stream]="remote" *for="let remote of remotes"></div>
+		</div>
+	</div>
+	<div class="group--aside">
+		<button type="button" class="btn btn--join" (click)="onJoin($event)">
+			<span *if="!uid">Join</span>
+			<span *if="uid">Joined</span>
+		</button>
+		<div class="listing--peers">
+			<div class="listing__item" (click)="onCall(peer)" [innerHTML]="peer" *for="let peer of remotePeers"></div>
+		</div>
+	</div>
+</div>
+<!-- @@close-->

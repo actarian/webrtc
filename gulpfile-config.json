@@ -1,0 +1,76 @@
+﻿{
+  "targets": {
+    "browser": {
+      "compile": [
+        {
+          "input": "src/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "src/css/main-cssvars.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/js/main.js",
+          "output": {
+            "file": "docs/js/main.js",
+            "format": "umd"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators",
+            "rxcomp": "rxcomp"
+          },
+          "minify": true
+        },
+        {
+          "input": "src/js/image/image.service.worker.js",
+          "output": {
+            "file": "docs/js/workers/image.service.worker.js",
+            "format": "umd"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [],
+      "copy": [{
+        "input": "src/modals/**/*.html",
+        "output": "docs/modals/"
+      }]
+    },
+    "vendors": {
+      "compile": [],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js",
+            "node_modules/rxcomp/dist/iife/rxcomp.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        },
+        {
+          "input": [
+            "node_modules/rxcomp/dist/rxcomp-dark.css"
+          ],
+          "output": "docs/css/vendors.css",
+          "minify": true
+        }
+      ],
+      "copy": []
+    }
+  },
+  "tfs": false,
+  "server": {
+    "root": "./docs",
+    "path": "/webrtc/",
+    "host": "0.0.0.0",
+    "port": 48765,
+    "log": false,
+    "https": {
+      "cert": "certs/server.crt"
+    }
+  }
+}

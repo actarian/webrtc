@@ -1,0 +1,34 @@
+{
+  "author": "Luca Zampetti <lzampetti@gmail.com>",
+  "name": "webrtc",
+  "description": "webrtc",
+  "version": "1.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/actarian/webrtc.git"
+  },
+  "engines": {
+    "node": "10.x"
+  },
+  "scripts": {
+    "start": "node server/main.js",
+    "serve": "node server/main.js",
+    "run": "gulp build --target vendors && gulp build && npm run serve"
+  },
+  "dependencies": {
+    "rxcomp": "1.0.0-beta.20",
+    "rxjs": "6.6.6",
+    "body-parser": "1.19.0",
+    "connect-multiparty": "2.2.0",
+    "events": "3.3.0",
+    "express-session": "1.17.1",
+    "express": "4.17.1",
+    "https": "1.0.0",
+    "mv": "2.1.1",
+    "ws": "7.4.5"
+  },
+  "devDependencies": {
+    "gulpfile-config": "1.0.0-alpha.14"
+  }
+}
