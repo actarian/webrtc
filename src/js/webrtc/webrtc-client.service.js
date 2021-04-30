@@ -1,6 +1,6 @@
 import { BehaviorSubject, combineLatest, of, ReplaySubject } from 'rxjs';
 import { filter, switchAll } from 'rxjs/operators';
-import { SignalingService } from './signaling.service';
+import { SignalingService } from '../signaling/signaling.service';
 
 const CONNECTION_OPTIONS = {
 	iceServers: [{

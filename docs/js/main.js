@@ -127,7 +127,132 @@ _defineProperty(SignalingService, "out$", new rxjs.ReplaySubject(1));var UserMed
   return UserMediaService;
 }();
 
-_defineProperty(UserMediaService, "stream", null);var CONNECTION_OPTIONS = {
+_defineProperty(UserMediaService, "stream", null);var WebSocketService = /*#__PURE__*/function () {
+  function WebSocketService() {}
+
+  WebSocketService.connect = function connect(uid, onMessageCallback) {
+    if (uid === void 0) {
+      uid = null;
+    }
+
+    if (onMessageCallback === void 0) {
+      onMessageCallback = null;
+    }
+
+    uid = uid || this.getUniqueUserId();
+    this.uid = uid;
+    this.onMessageCallback = onMessageCallback;
+    this.onOpen = this.onOpen.bind(this);
+    this.onClose = this.onClose.bind(this);
+    this.onMessage = this.onMessage.bind(this);
+    var host = location.origin.replace(/^https/, 'wss').replace(/^http/, 'ws');
+    var socket = this.socket = new WebSocket(host);
+    socket.addEventListener('open', this.onOpen);
+    socket.addEventListener('close', this.onClose);
+    socket.addEventListener('message', this.onMessage);
+  };
+
+  WebSocketService.disconnect = function disconnect() {
+    var socket = this.socket;
+
+    if (socket) {
+      socket.close();
+      this.socket = null;
+    }
+  };
+
+  WebSocketService.onOpen = function onOpen(event) {
+    // console.log('WebSocketService.onOpen');
+    var message = {
+      type: 'socketConnected'
+    };
+    this.message$.next(message);
+
+    if (typeof this.onMessageCallback === 'function') {
+      this.onMessageCallback(message);
+    }
+  };
+
+  WebSocketService.onClose = function onClose(event) {
+    // console.log('WebSocketService.onClose');const message = { type: 'socketConnected' };
+    var message = {
+      type: 'socketDisconnected'
+    };
+    this.message$.next(message);
+
+    if (typeof this.onMessageCallback === 'function') {
+      this.onMessageCallback(message);
+    }
+  };
+
+  WebSocketService.onMessage = function onMessage(event) {
+    var message = JSON.parse(event.data); // console.log('WebSocketService.onMessage', message);
+
+    if (message.remoteId) {
+      message.sendBack = function (response) {
+        if (response === void 0) {
+          response = {};
+        }
+
+        var backMessage = Object.assign({}, message, response, {
+          uid: message.remoteId,
+          remoteId: message.uid
+        });
+        WebSocketService.send(backMessage);
+      };
+    }
+
+    if (typeof this.onMessageCallback === 'function') {
+      this.onMessageCallback(message);
+    }
+
+    this.message$.next(message);
+  };
+
+  WebSocketService.send = function send(message, broadcast) {
+    if (message === void 0) {
+      message = {};
+    }
+
+    var socket = WebSocketService.socket;
+    message.uid = this.uid;
+    message.timeStamp = Date.now();
+
+    if (broadcast) {
+      message.broadcast = true;
+    } // console.log('WebSocketService.send', message);
+
+
+    socket.send(JSON.stringify(message));
+  };
+
+  WebSocketService.sendAll = function sendAll(message) {
+    if (message === void 0) {
+      message = {};
+    }
+
+    WebSocketService.send(message, true);
+  };
+
+  WebSocketService.getUniqueUserId = function getUniqueUserId() {
+    var mult = 10000000000000;
+    var a = (1 + Math.floor(Math.random() * 8)) * 100;
+    var b = (1 + Math.floor(Math.random() * 8)) * 10;
+    var c = (1 + Math.floor(Math.random() * 8)) * 1;
+    var combo = a + b + c;
+    var date = Date.now();
+    var uid = combo * mult + date; // console.log(combo);
+    // console.log(date);
+    // console.log(m);
+    // console.log('AgoraService.getUniqueUserId', uid);
+
+    return uid.toString();
+  };
+
+  return WebSocketService;
+}();
+
+_defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var CONNECTION_OPTIONS = {
   iceServers: [{
     urls: 'stun:stunserver.org'
   }, {
@@ -526,132 +651,7 @@ var WebRTCClientService = /*#__PURE__*/function () {
 
 _defineProperty(WebRTCClientService, "remotes$", new rxjs.ReplaySubject().pipe(operators.switchAll()));
 
-_defineProperty(WebRTCClientService, "peers$", new rxjs.BehaviorSubject([]));var WebSocketService = /*#__PURE__*/function () {
-  function WebSocketService() {}
-
-  WebSocketService.connect = function connect(uid, onMessageCallback) {
-    if (uid === void 0) {
-      uid = null;
-    }
-
-    if (onMessageCallback === void 0) {
-      onMessageCallback = null;
-    }
-
-    uid = uid || this.getUniqueUserId();
-    this.uid = uid;
-    this.onMessageCallback = onMessageCallback;
-    this.onOpen = this.onOpen.bind(this);
-    this.onClose = this.onClose.bind(this);
-    this.onMessage = this.onMessage.bind(this);
-    var host = location.origin.replace(/^https/, 'wss').replace(/^http/, 'ws');
-    var socket = this.socket = new WebSocket(host);
-    socket.addEventListener('open', this.onOpen);
-    socket.addEventListener('close', this.onClose);
-    socket.addEventListener('message', this.onMessage);
-  };
-
-  WebSocketService.disconnect = function disconnect() {
-    var socket = this.socket;
-
-    if (socket) {
-      socket.close();
-      this.socket = null;
-    }
-  };
-
-  WebSocketService.onOpen = function onOpen(event) {
-    // console.log('WebSocketService.onOpen');
-    var message = {
-      type: 'socketConnected'
-    };
-    this.message$.next(message);
-
-    if (typeof this.onMessageCallback === 'function') {
-      this.onMessageCallback(message);
-    }
-  };
-
-  WebSocketService.onClose = function onClose(event) {
-    // console.log('WebSocketService.onClose');const message = { type: 'socketConnected' };
-    var message = {
-      type: 'socketDisconnected'
-    };
-    this.message$.next(message);
-
-    if (typeof this.onMessageCallback === 'function') {
-      this.onMessageCallback(message);
-    }
-  };
-
-  WebSocketService.onMessage = function onMessage(event) {
-    var message = JSON.parse(event.data); // console.log('WebSocketService.onMessage', message);
-
-    if (message.remoteId) {
-      message.sendBack = function (response) {
-        if (response === void 0) {
-          response = {};
-        }
-
-        var backMessage = Object.assign({}, message, response, {
-          uid: message.remoteId,
-          remoteId: message.uid
-        });
-        WebSocketService.send(backMessage);
-      };
-    }
-
-    if (typeof this.onMessageCallback === 'function') {
-      this.onMessageCallback(message);
-    }
-
-    this.message$.next(message);
-  };
-
-  WebSocketService.send = function send(message, broadcast) {
-    if (message === void 0) {
-      message = {};
-    }
-
-    var socket = WebSocketService.socket;
-    message.uid = this.uid;
-    message.timeStamp = Date.now();
-
-    if (broadcast) {
-      message.broadcast = true;
-    } // console.log('WebSocketService.send', message);
-
-
-    socket.send(JSON.stringify(message));
-  };
-
-  WebSocketService.sendAll = function sendAll(message) {
-    if (message === void 0) {
-      message = {};
-    }
-
-    WebSocketService.send(message, true);
-  };
-
-  WebSocketService.getUniqueUserId = function getUniqueUserId() {
-    var mult = 10000000000000;
-    var a = (1 + Math.floor(Math.random() * 8)) * 100;
-    var b = (1 + Math.floor(Math.random() * 8)) * 10;
-    var c = (1 + Math.floor(Math.random() * 8)) * 1;
-    var combo = a + b + c;
-    var date = Date.now();
-    var uid = combo * mult + date; // console.log(combo);
-    // console.log(date);
-    // console.log(m);
-    // console.log('AgoraService.getUniqueUserId', uid);
-
-    return uid.toString();
-  };
-
-  return WebSocketService;
-}();
-
-_defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var AppComponent = /*#__PURE__*/function (_Component) {
+_defineProperty(WebRTCClientService, "peers$", new rxjs.BehaviorSubject([]));var AppComponent = /*#__PURE__*/function (_Component) {
   _inheritsLoose(AppComponent, _Component);
 
   function AppComponent() {
@@ -801,20 +801,6 @@ _defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var App
     WebRTCClientService.removePeer(peerId);
   };
 
-  _proto.onCall = function onCall(peerId) {
-    return;
-    /*
-    console.log('AppComponent.onCall', peerId);
-    const client = this.client = WebRTCClient.call(this.local, this.uid, peerId);
-    client.streams$.pipe(
-    	takeUntil(this.unsubscribe$),
-    ).subscribe(streams => {
-    	this.streams = streams;
-    	this.pushChanges();
-    });
-    */
-  };
-
   _proto.onOffer = function onOffer(message) {
     // console.log('AppComponent.onOffer', message);
     var client = WebRTCClientService.addPeer(this.local, this.uid, message.uid);
@@ -822,20 +808,6 @@ _defineProperty(WebSocketService, "message$", new rxjs.ReplaySubject(1));var App
     if (client != null) {
       client.onMessageOffer(message);
     }
-    /*
-    if (this.client) {
-    	return;
-    }
-    const client = this.client = WebRTCClient.answer(this.local, this.uid, message.uid);
-    client.onMessageOffer(message);
-    client.streams$.pipe(
-    	takeUntil(this.unsubscribe$),
-    ).subscribe(streams => {
-    	this.streams = streams;
-    	this.pushChanges();
-    });
-    */
-
   };
 
   _createClass(AppComponent, [{

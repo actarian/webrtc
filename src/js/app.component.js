@@ -1,9 +1,9 @@
 import { Component, getContext } from 'rxcomp';
 import { filter, takeUntil, tap } from 'rxjs/operators';
-import { SignalingService } from './webrtc/signaling.service';
-import { UserMediaService } from './webrtc/user-media.service';
+import { SignalingService } from './signaling/signaling.service';
+import { UserMediaService } from './user-media/user-media.service';
+import { WebSocketService } from './web-socket/web-socket.service';
 import { WebRTCClientService } from './webrtc/webrtc-client.service';
-import { WebSocketService } from './webrtc/websocket.service';
 
 export default class AppComponent extends Component {
 
@@ -123,39 +123,12 @@ export default class AppComponent extends Component {
 		WebRTCClientService.removePeer(peerId);
 	}
 
-	onCall(peerId) {
-		return;
-		/*
-		console.log('AppComponent.onCall', peerId);
-		const client = this.client = WebRTCClient.call(this.local, this.uid, peerId);
-		client.streams$.pipe(
-			takeUntil(this.unsubscribe$),
-		).subscribe(streams => {
-			this.streams = streams;
-			this.pushChanges();
-		});
-		*/
-	}
-
 	onOffer(message) {
 		// console.log('AppComponent.onOffer', message);
 		const client = WebRTCClientService.addPeer(this.local, this.uid, message.uid);
 		if (client != null) {
 			client.onMessageOffer(message);
 		}
-		/*
-		if (this.client) {
-			return;
-		}
-		const client = this.client = WebRTCClient.answer(this.local, this.uid, message.uid);
-		client.onMessageOffer(message);
-		client.streams$.pipe(
-			takeUntil(this.unsubscribe$),
-		).subscribe(streams => {
-			this.streams = streams;
-			this.pushChanges();
-		});
-		*/
 	}
 
 }

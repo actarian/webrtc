@@ -17,7 +17,7 @@
     "run": "gulp build --target vendors && gulp build && npm run serve"
   },
   "dependencies": {
-    "rxcomp": "1.0.0-beta.20",
+    "rxcomp": "actarian/rxcomp#rxcomp-perf",
     "rxjs": "6.6.6",
     "body-parser": "1.19.0",
     "connect-multiparty": "2.2.0",
